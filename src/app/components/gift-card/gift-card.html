@@ -5,60 +5,59 @@
     <span
       class="absolute top-3 left-3 z-20 bg-white text-gray-600 text-xs font-semibold px-3 py-1 rounded-full shadow-sm"
     >
-      {{ giftItem().category }}
+      {{ categoryName }}
     </span>
 
     <img
-      [src]="giftItem().images"
-      [alt]="giftItem().name"
-      class="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
+      [src]="giftItem.images"
+      [alt]="giftItem.name"
+      class="w-full h-full object-contain transition-transform duration-500 ease-in-out"
     />
 
-    @if (giftItem().reservedBy) {
+    @if (giftItem.status === 1) {
       <div
         class="absolute inset-0 bg-white/60 backdrop-blur-sm z-30 flex items-center justify-center transition-all duration-300"
       >
         <span
           class="bg-green-800 text-white text-sm font-bold uppercase tracking-wider px-6 py-2 rounded-full shadow-md"
         >
-          Reservado
+          Comprado
         </span>
-      </div>
-    } @else {
-      <div
-        class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 z-10"
-      >
-        <p class="text-white text-sm leading-snug mb-4 line-clamp-3 drop-shadow-md">
-          {{ giftItem().description }}
-        </p>
-
-        <div class="flex gap-2">
-          <button
-            (click)="onReserveClick()"
-            class="flex-1 bg-white/95 text-gray-900 rounded-lg py-2 font-semibold text-sm flex justify-center items-center gap-2 hover:bg-white transition-colors cursor-pointer shadow-sm"
-          >
-            <ng-icon name="lucideGift" class="text-base"></ng-icon>
-            Reservar
-          </button>
-
-          @if (giftItem().externalLink) {
-            <a
-              [href]="giftItem().externalLink"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="bg-white/20 hover:bg-white/30 text-white w-10 h-10 flex justify-center items-center rounded-lg transition-colors border border-white/20 shadow-sm cursor-pointer"
-            >
-              <ng-icon name="lucideExternalLink" class="text-base"></ng-icon>
-            </a>
-          }
-        </div>
       </div>
     }
   </div>
 
   <div class="p-4 flex flex-col grow">
-    <h3 class="text-md font-bold mb-1">{{ giftItem().name }}</h3>
-    <p class="text-sm font-normal text-gray-500 line-clamp-2">{{ giftItem().description }}</p>
-    <p class="text-xl font-semibold mt-4">R$ {{ giftItem().price | number: '1.2-2' }}</p>
+    <h3 class="text-md font-bold mb-1">{{ giftItem.name }}</h3>
+    <p class="text-sm font-normal text-gray-500 line-clamp-2">{{ giftItem.description }}</p>
+
+    <div class="mt-4">
+      @if (giftItem.status === 0) {
+        <p class="text-xl font-semibold mb-3">R$ {{ giftItem.price | number: '1.2-2' }}</p>
+      }
+
+      <div class="flex gap-2">
+        @if (giftItem.status === 0) {
+          <button
+            (click)="onReserveClick()"
+            class="flex-1 bg-green-600 text-white/95 rounded-lg py-2 h-10 font-semibold text-sm flex justify-center items-center gap-2 hover:bg-green-700 transition-colors cursor-pointer shadow-sm"
+          >
+            <ng-icon name="lucideGift" class="text-base"></ng-icon>
+            Comprar
+          </button>
+        }
+
+        @if (giftItem.externalLink) {
+          <a
+            [href]="giftItem.externalLink"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-900 gap-2 px-2 h-10 font-semibold text-sm flex justify-center items-center rounded-lg transition-colors border border-white/20 shadow-sm cursor-pointer"
+          >
+            Sugestão <ng-icon name="lucideExternalLink" class="text-base"></ng-icon>
+          </a>
+        }
+      </div>
+    </div>
   </div>
 </div>

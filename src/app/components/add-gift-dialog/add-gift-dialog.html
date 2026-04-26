@@ -1,0 +1,177 @@
+<div
+  class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity"
+>
+  <div
+    class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]"
+  >
+    <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center">
+      <h2 class="text-xl font-bold text-gray-900">{{ title }}</h2>
+      <button (click)="close.emit()" class="text-gray-400 hover:text-black transition-colors">
+        <ng-icon name="lucideX" class="text-xl"></ng-icon>
+      </button>
+    </div>
+
+    <form
+      [formGroup]="giftForm"
+      (ngSubmit)="onSubmit()"
+      class="px-6 py-6 overflow-y-auto space-y-5"
+    >
+      <div>
+        <label class="block text-[11px] uppercase font-semibold text-gray-500 tracking-wider mb-2"
+          >Nome do Item *</label
+        >
+        <input
+          type="text"
+          formControlName="name"
+          placeholder="Ex: Jogo de Panelas"
+          class="w-full bg-gray-50 border border-transparent focus:border-gray-300 focus:bg-white rounded-xl px-4 py-3 text-sm outline-none transition-colors"
+          [class.border-red-300]="giftForm.get('name')?.invalid && giftForm.get('name')?.touched"
+        />
+      </div>
+
+      <div>
+        <label class="block text-[11px] uppercase font-semibold text-gray-500 tracking-wider mb-2"
+          >Descrição</label
+        >
+        <textarea
+          formControlName="description"
+          placeholder="Descrição opcional do item..."
+          rows="3"
+          class="w-full bg-gray-50 border border-transparent focus:border-gray-300 focus:bg-white rounded-xl px-4 py-3 text-sm outline-none transition-colors resize-none"
+        ></textarea>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[11px] uppercase font-semibold text-gray-500 tracking-wider mb-2"
+            >Preço *</label
+          >
+          <div class="relative">
+            <span class="absolute left-4 top-3 text-gray-400 text-sm">R$</span>
+            <input
+              type="number"
+              formControlName="price"
+              placeholder="0,00"
+              class="w-full bg-gray-50 border border-transparent focus:border-gray-300 focus:bg-white rounded-xl pl-10 pr-4 py-3 text-sm outline-none transition-colors"
+              [class.border-red-300]="
+                giftForm.get('price')?.invalid && giftForm.get('price')?.touched
+              "
+            />
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase font-semibold text-gray-500 tracking-wider mb-2"
+            >Categoria *</label
+          >
+          <input
+            type="text"
+            [value]="selectedCategoryName"
+            readonly
+            class="w-full bg-gray-50 border border-transparent rounded-xl px-4 py-3 text-sm text-gray-700 outline-none cursor-default"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[11px] uppercase font-semibold text-gray-500 tracking-wider mb-2"
+          >Categoria Visual</label
+        >
+        <div class="flex flex-wrap gap-2">
+          @for (cat of categories; track cat.id) {
+            <button
+              type="button"
+              (click)="setCategory(cat.id)"
+              class="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 border"
+              [class]="
+                giftForm.get('category')?.value === cat.id
+                  ? 'bg-[#111827] text-white border-[#111827] shadow-md'
+                  : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'
+              "
+            >
+              <ng-icon [name]="cat.icon" class="text-lg"></ng-icon>
+              {{ cat.name }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div>
+        <label
+          class="flex items-center gap-1.5 text-[11px] uppercase font-semibold text-gray-500 tracking-wider mb-2"
+        >
+          <ng-icon name="lucideLink" class="text-gray-400"></ng-icon> Link Externo
+        </label>
+        <input
+          type="text"
+          formControlName="externalLink"
+          placeholder="https://..."
+          class="w-full bg-gray-50 border border-transparent focus:border-gray-300 focus:bg-white rounded-xl px-4 py-3 text-sm outline-none transition-colors"
+        />
+      </div>
+
+      <div>
+        <label
+          class="flex items-center gap-1.5 text-[11px] uppercase font-semibold text-gray-500 tracking-wider mb-2"
+        >
+          <ng-icon name="lucideUpload" class="text-gray-400"></ng-icon> URL da Imagem
+        </label>
+        <input
+          type="text"
+          formControlName="images"
+          placeholder="https://exemplo.com/imagem.jpg"
+          class="w-full bg-gray-50 border border-transparent focus:border-gray-300 focus:bg-white rounded-xl px-4 py-3 text-sm outline-none transition-colors"
+        />
+      </div>
+
+      @if (giftItem && giftItem.status === 1) {
+        <h2 class="my-4 text-lg px-2">Reservado por:</h2>
+        <div class="flex items-center">
+          <div>
+            <label
+              class="flex items-center gap-1.5 text-[11px] uppercase font-semibold text-gray-500 tracking-wider mb-2"
+            >
+              <ng-icon name="lucideUpload" class="text-gray-400"></ng-icon> Nome
+            </label>
+            <input
+              type="text"
+              formControlName="guestName"
+              placeholder="Nome de quem reservou"
+              class="w-full bg-gray-50 border border-transparent focus:border-gray-300 focus:bg-white rounded-xl px-4 py-3 text-sm outline-none transition-colors"
+            />
+          </div>
+
+          <div>
+            <label
+              class="flex items-center gap-1.5 text-[11px] uppercase font-semibold text-gray-500 tracking-wider mb-2"
+            >
+              <ng-icon name="lucideUpload" class="text-gray-400"></ng-icon> Telefone
+            </label>
+            <input
+              type="text"
+              formControlName="guestPhone"
+              placeholder="Nome de quem reservou"
+              class="w-full bg-gray-50 border border-transparent focus:border-gray-300 focus:bg-white rounded-xl px-4 py-3 text-sm outline-none transition-colors"
+            />
+          </div>
+        </div>
+      }
+    </form>
+
+    <div class="px-6 py-4 bg-white border-t border-gray-100 flex gap-3 justify-end rounded-b-2xl">
+      <button
+        type="button"
+        (click)="close.emit()"
+        class="px-6 py-3 rounded-xl text-sm font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors w-1/2"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        (click)="onSubmit()"
+        class="px-6 py-3 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors shadow-sm w-1/2 flex justify-center items-center gap-1"
+      >
+        <span>+</span> {{ saveButton }}
+      </button>
+    </div>
+  </div>
+</div>

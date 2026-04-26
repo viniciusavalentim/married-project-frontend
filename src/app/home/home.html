@@ -1,75 +1,130 @@
-<!-- Header -->
-<header class="flex flex-col items-center justify-center space-y-6 mt-8">
-  <div class="flex items-center justify-center gap-3">
-    <div class="h-px w-12 bg-gray-300"></div>
-    <span class="text-gray-300 text-md flex items-center">
-      <ng-icon name="lucideHeart"></ng-icon>
-    </span>
-    <div class="h-px w-12 bg-gray-300"></div>
-  </div>
-  <div>
-    <h3 class="tracking-widest">LISTA DE CASAMENTO</h3>
-  </div>
-  <div class="flex flex-col items-center gap-2">
-    <h1 class="text-4xl font-bold">Livia & Vinicius</h1>
-    <p class="text-md text-gray-400">17 de Julho, 2027</p>
-  </div>
-  <app-countdown targetDateStr="17/07/2027"></app-countdown>
-</header>
+<div class="min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="flex flex-col items-center justify-center space-y-6 mt-8">
+    <div class="flex items-center justify-center gap-3">
+      <div class="h-px w-12 bg-gray-300"></div>
+      <span class="text-gray-300 text-md flex items-center">
+        <ng-icon name="lucideHeart"></ng-icon>
+      </span>
+      <div class="h-px w-12 bg-gray-300"></div>
+    </div>
+    <div>
+      <h3 class="tracking-widest">LISTA DE CASAMENTO</h3>
+    </div>
+    <div class="flex flex-col items-center gap-2">
+      <h1 class="text-4xl font-bold">Livia & Vinicius</h1>
+      <p class="text-md text-gray-400">17 de Julho, 2027</p>
+    </div>
+    <app-countdown targetDateStr="17/07/2027"></app-countdown>
+  </header>
 
-<!-- Main -->
-<main class="flex flex-col justify-center items-center mt-15 space-y-8">
-  <div class="gap-2 flex flex-wrap justify-center items-center w-full max-w-3xl">
-    @for (item of filters; track $index) {
-      <button
-        class="transition-colors duration-300 ease-in-out px-4 text-sm py-2 rounded-md font-medium flex gap-2 items-center"
-        [class]="
-          isSelected === item.id
-            ? 'bg-black text-white hover:bg-black/80'
-            : 'bg-gray-100 hover:bg-black/10'
-        "
-        (click)="handleChangeFilter(item.id)"
-      >
-        <ng-icon [name]="item.icon" class="text-md"></ng-icon>
-        {{ item.name }}
-      </button>
-    }
-  </div>
+  <!-- Main -->
+  <main class="flex flex-col justify-center items-center mt-15 space-y-8">
+    <div class="relative w-full max-w-xl group px-5">
+      <span class="absolute inset-y-0 left-0 flex items-center pl-8 text-gray-400">
+        <ng-icon name="lucideSearch" class="text-lg"></ng-icon>
+      </span>
+      <input
+        type="text"
+        placeholder="Pesquisar presente..."
+        (input)="onSearchChange($event)"
+        [value]="searchText()"
+        class="w-full bg-white border border-gray-200 py-3 pl-10 pr-4 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all duration-300 font-[Montserrat]"
+      />
+    </div>
+    <div class="gap-2 flex flex-wrap justify-center items-center w-full max-w-3xl">
+      @for (item of filters; track item.id) {
+        <button
+          class="transition-colors duration-300 ease-in-out px-4 text-sm py-2 rounded-md font-medium flex gap-2 items-center"
+          [class]="
+            isSelected() === item.id
+              ? 'bg-black text-white hover:bg-black/80'
+              : 'bg-gray-100 hover:bg-black/10'
+          "
+          (click)="handleChangeFilter(item.id)"
+        >
+          <ng-icon [name]="item.icon" class="text-md"></ng-icon>
+          {{ item.name }}
+        </button>
+      }
+    </div>
 
-  <div
-    class="flex flex-col items-start gap-3 my-4 w-full max-w-6xl mx-auto px-12 mb-6 justify-start"
-  >
-    <span class="text-sm font-medium text-gray-600"> Exibir itens reservados </span>
-
-    <button
-      type="button"
-      (click)="toggleReserved()"
-      class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none"
-      [class]="showReserved() ? 'bg-green-800' : 'bg-gray-300'"
-      role="switch"
+    <div
+      class="flex flex-col items-start gap-3 my-4 w-full max-w-6xl mx-auto px-12 mb-6 justify-start"
     >
-      <span
-        class="pointer-events-none inline-block size-5 transform rounded-full bg-white shadow ring-0 transition duration-300 ease-in-out"
-        [class]="showReserved() ? 'translate-x-5' : 'translate-x-0'"
-      ></span>
-    </button>
-  </div>
+      <span class="text-sm font-medium text-gray-600"> Exibir itens reservados </span>
 
-  <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-    @for (item of gifts; track $index) {
-      <app-gift-card [giftItem]="item" (reserve)="openModal($event)"></app-gift-card>
+      <button
+        type="button"
+        (click)="toggleReserved()"
+        class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none"
+        [class]="showReserved() ? 'bg-green-800' : 'bg-gray-300'"
+        role="switch"
+      >
+        <span
+          class="pointer-events-none inline-block size-5 transform rounded-full bg-white shadow ring-0 transition duration-300 ease-in-out"
+          [class]="showReserved() ? 'translate-x-5' : 'translate-x-0'"
+        ></span>
+      </button>
+    </div>
+
+    @if (isLoadingGifts()) {
+      <div class="flex justify-center items-center py-10 text-slate-500">
+        <svg
+          class="animate-spin h-8 w-8"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+        <span class="ml-3">Carregando presentes...</span>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
+        @for (item of filteredGifts(); track item.id) {
+          <app-gift-card [giftItem]="item" (reserve)="openModal($event)"></app-gift-card>
+        } @empty {
+          <div class="col-span-full flex w-full items-center justify-center">
+            <p class="text-gray-500 mt-8">Nenhum presente encontrado para este filtro.</p>
+          </div>
+        }
+      </div>
     }
-  </div>
-</main>
+  </main>
 
-<footer>
-  <!-- Aqui vai ficar um footer -->
-</footer>
+  <footer
+    class="w-full border-t border-gray-100 pt-12 pb-8 flex flex-col items-center justify-center bg-white mt-auto"
+  >
+    <div class="flex flex-col items-center gap-2 text-xs text-gray-400">
+      <p>© 2027 Livia & Vinicius. Todos os direitos reservados.</p>
+      <p class="flex items-center gap-1">
+        Desenvolvido com
+        <ng-icon name="lucideHeart" class="text-gray-300 text-[10px]"></ng-icon>
+        para o nosso grande dia.
+      </p>
+    </div>
+  </footer>
+</div>
 
 @if (isModalOpen()) {
   <app-reserve-dialog
+    [isReservedSuccess]="isReservedSuccess()"
+    [isSaveLoading]="isLoading()"
     (close)="closeModal()"
-    (confirm)="confirmReservation()"
+    (confirm)="confirmReservation($event)"
     [gift]="selectedGift()"
   ></app-reserve-dialog>
 }

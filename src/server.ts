@@ -7,6 +7,13 @@ import {
 import express from 'express';
 import { join } from 'node:path';
 
+const isDevEnvironment = process.env['NODE_ENV'] !== 'production';
+
+if (isDevEnvironment) {
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+  console.warn('⚠️ ATENÇÃO: Verificação TLS desativada apenas para desenvolvimento local.');
+}
+
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
@@ -41,9 +48,7 @@ app.use(
 app.use((req, res, next) => {
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
+    .then((response) => (response ? writeResponseToNodeResponse(response, res) : next()))
     .catch(next);
 });
 

@@ -18,7 +18,7 @@ export interface GiftReservedBy {
   reservedAt: Date;
 }
 
-export interface GiftItem {
+export interface GiftItemv2 {
   id: string;
   name: string;
   description?: string;

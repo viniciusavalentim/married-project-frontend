@@ -1,0 +1,404 @@
+<div class="w-full max-w-7xl mx-auto px-6">
+  <div class="flex flex-col md:flex-row justify-between gap-4 items-center my-8">
+    <div>
+      <h1 class="text-3xl font-semibold">Gerenciar Lista de Presentes</h1>
+      <p>Visualize e gerencie todos os itens da lista de presentes</p>
+    </div>
+    <button
+      (click)="openAddModal()"
+      class="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors shadow-md"
+    >
+      + Novo Presente
+    </button>
+  </div>
+</div>
+<div class="w-full max-w-7xl mx-auto px-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-[#F9F9FB] p-6 rounded-xl border border-gray-100 flex flex-col">
+      <div class="flex items-center gap-3 text-gray-500">
+        <ng-icon name="lucideGift" class="text-xl"></ng-icon>
+        <span class="text-xs font-normal tracking-widest text-gray-950">VALOR TOTAL DA LISTA</span>
+      </div>
+      <h3 class="text-2xl font-semibold text-gray-900 mt-4 mb-1">
+        R$ {{ totalValueGifts() | number: '1.2-2' }}
+      </h3>
+      <p class="text-xs text-gray-500 font-normal">{{ gifts().length }} itens cadastrados.</p>
+    </div>
+
+    <div class="bg-[#F9F9FB] p-6 rounded-xl border border-gray-100 flex flex-col">
+      <div class="flex items-center gap-3 text-gray-500">
+        <ng-icon name="lucideUsers" class="text-xl text-green-600"></ng-icon>
+        <span class="text-xs font-normal tracking-widest text-gray-950">PRESENTES CONVIDADOS</span>
+      </div>
+      <h3 class="text-2xl font-semibold text-[#57876D] mt-4 mb-1">
+        R$ {{ totalValueGiftsReserved() | number: '1.2-2' }}
+      </h3>
+    </div>
+
+    <div class="bg-[#F9F9FB] p-6 rounded-xl border border-gray-100 flex flex-col">
+      <div class="flex items-center gap-3 text-gray-500">
+        <ng-icon name="lucideWallet" class="text-xl text-red-500"></ng-icon>
+        <span class="text-xs font-normal tracking-widest text-gray-950">NOSSOS GASTOS</span>
+      </div>
+      <h3 class="text-2xl font-semibold text-[#C7A42A] mt-4 mb-1">
+        R$ {{ totalValueGiftsSpent() | number: '1.2-2' }}
+      </h3>
+    </div>
+
+    <div class="bg-[#F9F9FB] p-6 rounded-xl border border-gray-100 flex flex-col">
+      <div class="flex items-center gap-3 text-gray-500">
+        <ng-icon name="lucideTarget" class="text-xl text-black"></ng-icon>
+        <span class="text-xs font-normal tracking-widest text-gray-950">PROGRESSO</span>
+      </div>
+      <p class="text-xl font-semibold mb-2 mt-3">{{ totalProgress() }}%</p>
+      <div class="w-full bg-gray-100 h-2 rounded-full mt-2 overflow-hidden">
+        <div class="bg-black h-full rounded-full" [style.width.%]="totalProgress()"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-4 mt-6">
+    <h3 class="text-xl">Gerenciar Itens</h3>
+    <div class="relative w-full mb-6">
+      <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+        <ng-icon name="lucideSearch" class="text-lg"></ng-icon>
+      </span>
+      <input
+        type="text"
+        placeholder="Pesquisar presente..."
+        class="w-full bg-gray-50 border border-gray-200 py-3 pl-10 pr-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all duration-300 font-[Montserrat]"
+        (input)="onSearchChange($event)"
+        [value]="searchQuery()"
+      />
+    </div>
+    <div class="border border-gray-200 rounded-xl bg-[#f8f9fb] p-5 flex flex-col gap-6">
+      <div class="flex flex-col items-start gap-4">
+        <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide w-20">STATUS</p>
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            (click)="setStatusFilter('all')"
+            [ngClass]="
+              statusFilter() === 'all'
+                ? 'bg-[#0f172a] text-white'
+                : 'text-slate-500 hover:bg-slate-200/50'
+            "
+            class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+          >
+            Todos
+          </button>
+          <button
+            (click)="setStatusFilter('available')"
+            [ngClass]="
+              statusFilter() === 'available'
+                ? 'bg-[#0f172a] text-white'
+                : 'text-slate-500 hover:bg-slate-200/50'
+            "
+            class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+          >
+            Disponível
+          </button>
+          <button
+            (click)="setStatusFilter('reserved')"
+            [ngClass]="
+              statusFilter() === 'reserved'
+                ? 'bg-[#0f172a] text-white'
+                : 'text-slate-500 hover:bg-slate-200/50'
+            "
+            class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+          >
+            Reservado
+          </button>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-start gap-4">
+        <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wide w-20">
+          CATEGORIA
+        </p>
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            (click)="setCategoryFilter('all')"
+            [ngClass]="
+              categoryFilter() === 'all'
+                ? 'bg-[#0f172a] text-white'
+                : 'text-slate-500 hover:bg-slate-200/50'
+            "
+            class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+          >
+            Todas
+          </button>
+
+          <button
+            (click)="setCategoryFilter('cozinha')"
+            [ngClass]="
+              categoryFilter() === 'cozinha'
+                ? 'bg-[#0f172a] text-white'
+                : 'text-slate-500 hover:bg-slate-200/50'
+            "
+            class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5"
+          >
+            <ng-icon name="lucideUtensils" class="text-[15px]"></ng-icon> Cozinha
+          </button>
+
+          <button
+            (click)="setCategoryFilter('banheiro')"
+            [ngClass]="
+              categoryFilter() === 'banheiro'
+                ? 'bg-[#0f172a] text-white'
+                : 'text-slate-500 hover:bg-slate-200/50'
+            "
+            class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5"
+          >
+            <ng-icon name="lucideBath" class="text-[15px]"></ng-icon> Banheiro
+          </button>
+
+          <button
+            (click)="setCategoryFilter('quarto')"
+            [ngClass]="
+              categoryFilter() === 'quarto'
+                ? 'bg-[#0f172a] text-white'
+                : 'text-slate-500 hover:bg-slate-200/50'
+            "
+            class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5"
+          >
+            <ng-icon name="lucideBedDouble" class="text-[15px]"></ng-icon> Quarto
+          </button>
+
+          <button
+            (click)="setCategoryFilter('sala')"
+            [ngClass]="
+              categoryFilter() === 'sala'
+                ? 'bg-[#0f172a] text-white'
+                : 'text-slate-500 hover:bg-slate-200/50'
+            "
+            class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5"
+          >
+            <ng-icon name="lucideSofa" class="text-[15px]"></ng-icon> Sala
+          </button>
+
+          <button
+            (click)="setCategoryFilter('decoracao')"
+            [ngClass]="
+              categoryFilter() === 'decoracao'
+                ? 'bg-[#0f172a] text-white'
+                : 'text-slate-500 hover:bg-slate-200/50'
+            "
+            class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5"
+          >
+            <ng-icon name="lucidePalette" class="text-[15px]"></ng-icon> Decoração
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p class="mt-4 mb-2 text-[13px] text-slate-500 font-medium">
+      {{ filteredGifts().length }} itens encontrados
+    </p>
+  </div>
+
+  <div class="w-full overflow-x-auto font-sans rounded-lg mt-6 mb-12">
+    <table class="w-full border-collapse text-left whitespace-nowrap">
+      <thead>
+        <tr>
+          <th
+            class="p-4 text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-200 bg-slate-50/50"
+          >
+            Item
+          </th>
+          <th
+            class="p-4 text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-200 bg-slate-50/50"
+          >
+            Categoria
+          </th>
+          <th
+            class="p-4 text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-200 bg-slate-50/50"
+          >
+            Preço
+          </th>
+          <th
+            class="p-4 text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-200 bg-slate-50/50"
+          >
+            Status
+          </th>
+          <th
+            class="p-4 text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-200 bg-slate-50/50"
+          >
+            Reservado Por
+          </th>
+          <th
+            class="p-4 text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-200 bg-slate-50/50"
+          >
+            Data/Hora
+          </th>
+          <th
+            class="p-4 text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-200 bg-slate-50/50 text-center"
+          >
+            Ações
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of filteredGifts(); track $index) {
+          <tr>
+            <td class="p-4 align-middle border-b border-gray-100">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-lg">
+                  <img
+                    [src]="item.images"
+                    [alt]="item.name"
+                    class="w-full h-full object-contain rounded-lg"
+                  />
+                </div>
+                <div class="flex flex-col gap-1">
+                  <span class="font-medium text-gray-900 text-sm">{{ item.name }}</span>
+                  <a
+                    [href]="item.externalLink"
+                    target="_blank"
+                    class="text-xs text-teal-600 hover:underline flex items-center gap-1"
+                  >
+                    <ng-icon name="lucideExternalLink" class="text-sm"></ng-icon> Ver produto
+                  </a>
+                </div>
+              </div>
+            </td>
+
+            <td class="p-4 align-middle border-b border-gray-100 text-sm text-gray-500">
+              {{ getCategoryName(item.category) }}
+            </td>
+
+            <td class="p-4 align-middle border-b border-gray-100 font-medium text-gray-900 text-sm">
+              R$ {{ item.price | number: '1.2-2' }}
+            </td>
+
+            <td class="p-4 align-middle border-b border-gray-100">
+              <span class="text-[13px] font-medium" [ngClass]="getStatusClasses(item.status)">
+                {{ item.status === 1 ? 'Reservado' : 'Disponível' }}
+              </span>
+            </td>
+
+            <td class="p-4 align-middle border-b border-gray-100 text-sm">
+              @if (item.status === 1) {
+                <div class="flex flex-col gap-1">
+                  <span class="flex items-center gap-1.5 text-gray-500">
+                    <ng-icon name="lucideUser" class="text-base"></ng-icon>
+                    {{ item.reservedBy.guestName }}
+                  </span>
+                  <span class="text-gray-500 flex items-center gap-1.5">
+                    <ng-icon name="lucidePhone" class="text-base"></ng-icon>
+                    {{ item.reservedBy.guestPhone }}
+                  </span>
+                </div>
+              } @else {
+                <span class="justify-center flex text-gray-400">---</span>
+              }
+            </td>
+
+            <td class="p-4 align-middle border-b border-gray-100 text-sm">
+              @if (item.status === 1) {
+                <div class="flex flex-col gap-1 text-gray-500">
+                  <span class="flex items-center gap-1.5">
+                    <ng-icon name="lucideCalendar" class="text-base"></ng-icon>
+                    {{ item.reservedBy.reservedAt | date: 'dd/MM/yyyy' }}
+                  </span>
+                  <span class="flex items-center gap-1.5">
+                    <ng-icon name="lucideClock" class="text-base"></ng-icon>
+                    {{ item.reservedBy.reservedAt | date: 'HH:mm' }}
+                  </span>
+                </div>
+              } @else {
+                <span class="justify-center flex text-gray-400">---</span>
+              }
+            </td>
+
+            <td class="p-4 align-middle border-b border-gray-100 text-center relative">
+              <button
+                (click)="toggleDropdown(item.id || $index, $event)"
+                class="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors focus:outline-none inline-flex items-center justify-center"
+                [ngClass]="{
+                  'bg-gray-100 text-gray-700': openDropdownId() === (item.id || $index),
+                }"
+              >
+                <ng-icon name="lucideMoreHorizontal" class="text-xl"></ng-icon>
+              </button>
+
+              @if (openDropdownId() === (item.id || $index)) {
+                <div
+                  class="absolute right-10 top-12 w-48 bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-gray-200 py-1.5 z-50 text-left transform origin-top-right transition-all"
+                  (click)="$event.stopPropagation()"
+                >
+                  <button
+                    class="w-full px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-slate-50 flex items-center gap-2.5 transition-colors"
+                    (click)="openAddModal(item)"
+                  >
+                    <ng-icon name="lucideEdit" class="text-gray-400 text-base"></ng-icon>
+                    Editar
+                  </button>
+                  @if (item.status === 1) {
+                    <button
+                      class="w-full px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-slate-50 flex items-center gap-2.5 transition-colors"
+                      (click)="openConfirmModal(item.id)"
+                    >
+                      <ng-icon name="lucideX" class="text-gray-400 text-base"></ng-icon>
+                      Remover Reserva
+                    </button>
+                  }
+                </div>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="p-8 text-center text-gray-400 text-sm">
+              Nenhum item encontrado para os filtros selecionados.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@if (isAddModalOpen()) {
+  <app-add-gift-dialog
+    (close)="closeAddModal()"
+    (addGift)="handleSaveGift($event)"
+    [giftItem]="giftItem"
+  >
+  </app-add-gift-dialog>
+}
+
+@if (isConfirmModalOpen()) {
+  <div
+    class="fixed inset-0 bg-black/40 z-100 flex items-center justify-center p-4 backdrop-blur-sm transition-opacity"
+  >
+    <div
+      class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col transform transition-all text-center p-6"
+    >
+      <div class="mx-auto flex items-center justify-center h-14 w-14 rounded-full bg-red-50 mb-4">
+        <ng-icon name="lucideAlertTriangle" color="red" class="text-2xl text-red-500"></ng-icon>
+      </div>
+
+      <h3 class="text-lg font-bold text-gray-900 mb-2">Remover Reserva?</h3>
+      <p class="text-sm text-gray-500 mb-8">
+        Tem certeza que deseja remover a reserva deste item? Ele voltará a ficar disponível para
+        outros convidados. Esta ação não pode ser desfeita.
+      </p>
+
+      <div class="flex gap-3 justify-center w-full">
+        <button
+          (click)="closeConfirmModal()"
+          class="w-1/2 px-4 py-3 rounded-xl text-sm font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors"
+        >
+          Cancelar
+        </button>
+
+        <button
+          (click)="confirmRemove()"
+          class="w-1/2 px-4 py-3 rounded-xl text-sm font-semibold text-white bg-red-500 hover:bg-red-600 shadow-sm transition-colors"
+        >
+          Sim, Remover
+        </button>
+      </div>
+    </div>
+  </div>
+}

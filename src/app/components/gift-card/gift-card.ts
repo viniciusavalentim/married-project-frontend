@@ -1,8 +1,8 @@
-import { Component, input, output } from '@angular/core';
-import { GiftItem } from '../../../utils/types/gift';
+import { Component, EventEmitter, Input, input, Output, output } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { lucideGift, lucideExternalLink } from '@ng-icons/lucide';
+import { GiftItem } from '../../features/gifts/models/gift-item.interface';
 
 @Component({
   selector: 'app-gift-card',
@@ -12,11 +12,31 @@ import { lucideGift, lucideExternalLink } from '@ng-icons/lucide';
   templateUrl: './gift-card.html',
 })
 export class GiftCardComponent {
-  giftItem = input.required<GiftItem>();
+  @Input({ required: true }) giftItem!: GiftItem;
+  @Output() reserve = new EventEmitter<GiftItem>();
 
-  reserve = output<any>();
+  get categoryName(): string {
+    switch (this.giftItem.category) {
+      case 1:
+        return 'Cozinha';
+      case 2:
+        return 'Quarto';
+      case 3:
+        return 'Banheiro';
+      case 4:
+        return 'Sala';
+      case 5:
+        return 'Decoração';
+      default:
+        return 'Outros';
+    }
+  }
 
-  public onReserveClick() {
-    this.reserve.emit(this.giftItem());
+  get statusName(): string {
+    return this.giftItem.status === 0 ? 'Disponível' : 'Reservado';
+  }
+
+  onReserveClick() {
+    this.reserve.emit(this.giftItem);
   }
 }
