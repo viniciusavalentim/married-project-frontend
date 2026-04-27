@@ -53,19 +53,24 @@ export class AddGiftDialogComponent implements OnInit {
 
   onSubmit() {
     const { guestName, guestPhone, ...giftData } = this.giftForm.value;
+
     if (this.giftForm.valid) {
       let payloadToEmit;
-
       if (this.giftItem) {
+        const currentStatus = Number(giftData.status);
+        const reservedByPayload =
+          currentStatus === 1
+            ? {
+                ...(this.giftItem.reservedBy || {}),
+                guestName: guestName,
+                guestPhone: guestPhone,
+              }
+            : null;
         payloadToEmit = {
           giftItem: {
             ...this.giftItem,
             ...giftData,
-            reservedBy: {
-              ...(this.giftItem.reservedBy || {}),
-              guestName: guestName,
-              guestPhone: guestPhone,
-            },
+            reservedBy: reservedByPayload,
           },
         };
       } else {
