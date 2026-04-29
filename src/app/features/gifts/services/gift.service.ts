@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { GetGiftItems } from '../models/gift-item.interface';
 import { CreateGiftRequest, EditGiftRequest } from '../models/create-gift.request';
@@ -14,7 +14,8 @@ export class GiftService {
   private readonly baseUrl = `${environment.apiUrl}/GiftItem`;
 
   getGifts(): Observable<GetGiftItems> {
-    return this.http.get<GetGiftItems>(this.baseUrl);
+    const params = new HttpParams().set('_t', Date.now().toString());
+    return this.http.get<GetGiftItems>(this.baseUrl, { params });
   }
 
   reservedGift(request: ReservedGiftRequest): Observable<any> {
